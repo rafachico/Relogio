@@ -1,0 +1,63 @@
+LIBRARY ieee;
+USE ieee.std_logic_1164.all;
+USE ieee.numeric_std.all;
+USE work.bcd_decoder.all;
+ENTITY relogio_digital IS
+GENERIC (SEG: INTEGER := 1); -- DEFINE O NUMERO DE CLOCKS PARA CONTAR UM SEGUNDO
+PORT(
+        ENTRADAS E SAIDAS
+ HEX0_D  :OUT STD_LOGIC_VECTOR (6 downto 0);
+ HEX1_D  :OUT STD_LOGIC_VECTOR (6 downto 0);
+ HEX2_D  :OUT STD_LOGIC_VECTOR (6 downto 0);
+ HEX3_D  :OUT STD_LOGIC_VECTOR (6 downto 0);
+ CLOCK_50 :IN STD_LOGIC
+);
+END relogio_digital;
+
+ARCHITECTURE behavioural OF relogio_digital IS 
+ SIGNAL TEMPORAL: INTEGER RANGE 0 TO SEG;
+
+ SIGNAL M0: INTEGER RANGE 0 TO 9 := 0; 
+ SIGNAL M1: INTEGER RANGE 0 TO 5 := 0; 
+ SIGNAL S0: INTEGER RANGE 0 TO 9 := 0; 
+ SIGNAL S1: INTEGER RANGE 0 TO 5 := 0; 
+ 
+BEGIN
+        -- Exibe nos displays fazendo a conversão usando o codigo no outro arquivo
+ HEX0 <= int2seg(S0);
+ HEX1 <= int2seg(S1);
+ HEX2 <= int2seg(M0);
+ HEX3 <= int2seg(M1);
+ 
+ PROCESS(CLOCK_50) 
+ BEGIN
+  IF rising_edge(CLOCK_50) THEN -- NA BORDA DE SUBIDA
+                        
+   IF(TEMPORAL /= SEG) THEN
+    TEMPORAL <= TEMPORAL + 1;  
+                        
+   ELSE 
+    TEMPORAL <= 0;
+     S0 <= S0 + 1;
+     IF(S0 = 9) THEN 
+      S0 <= 0; 
+      S1 <= S1 + 1; 
+      IF(S1 = 5) THEN 
+       S1 <= 0;
+       M0 <= M0 + 1;
+       IF(M0 = 9) THEN
+        M0 <= 0;
+        M1 <= M1 + 1;
+       IF (M1 = 5) THEN
+         M1 <= 0;
+         M0 <= 0;
+         S1 <= 0;
+         S0 <= 0;
+       END IF;
+		 END IF;
+      END IF;
+     END IF;
+    END IF;
+   END IF;
+ END PROCESS;
+END behavioural;
